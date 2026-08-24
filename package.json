@@ -1,0 +1,31 @@
+{
+  "name": "yasawi-startup-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "npm run dev --workspace=@yasawi/web",
+    "dev:web": "npm run dev --workspace=@yasawi/web",
+    "dev:api": "npm run start:dev --workspace=@yasawi/api",
+    "build": "npm run build --workspace=@yasawi/api && npm run build --workspace=@yasawi/web",
+    "lint": "npm run lint --workspace=@yasawi/web",
+    "typecheck": "npm run typecheck --workspace=@yasawi/web && npm run typecheck --workspace=@yasawi/api",
+    "db:generate": "npm run db:generate --workspace=@yasawi/api",
+    "db:migrate": "npm run db:migrate --workspace=@yasawi/api",
+    "db:deploy": "npm run db:deploy --workspace=@yasawi/api",
+    "db:seed": "npm run db:seed --workspace=@yasawi/api",
+    "db:studio": "npm run db:studio --workspace=@yasawi/api",
+    "test:smoke": "npm run test:smoke --workspace=@yasawi/api",
+    "test:contracts": "npm run test:contracts --workspace=@yasawi/api",
+    "test:news-sync": "npm run test:news-sync --workspace=@yasawi/api",
+    "test:security": "npm run test:security --workspace=@yasawi/api",
+    "test:cohort-stats": "npm run test:cohort-stats --workspace=@yasawi/api",
+    "test:localization": "npm run test:localization --workspace=@yasawi/api",
+    "test:text-integrity": "npm run test:text-integrity --workspace=@yasawi/api",
+    "test:integrations": "npm run test:integrations --workspace=@yasawi/api",
+    "test:seo": "npm run test:seo --workspace=@yasawi/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

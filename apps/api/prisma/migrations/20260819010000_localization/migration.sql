@@ -1,0 +1,11 @@
+ALTER TABLE "SiteSettings"
+ADD COLUMN "defaultLocale" TEXT NOT NULL DEFAULT 'ru',
+ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+
+ALTER TABLE "PageContent" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "Program" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "Project" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "Partner" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "ItCourse" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "TeamMember" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "NewsItem" ADD COLUMN "translations" JSONB NOT NULL DEFAULT '{}';

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: yasawi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: yasawi_startup
+      POSTGRES_USER: yasawi
+      POSTGRES_PASSWORD: yasawi_local_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - yasawi_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yasawi -d yasawi_startup"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  yasawi_postgres_data:

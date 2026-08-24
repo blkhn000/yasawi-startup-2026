@@ -1,0 +1,1 @@
+ALTER TABLE "Application" ADD COLUMN "locale" TEXT NOT NULL DEFAULT 'ru';

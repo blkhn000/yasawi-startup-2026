@@ -1,0 +1,390 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdminRole {
+  admin
+  editor
+}
+
+enum ApplicationStatus {
+  new
+  reviewing
+  interview
+  accepted
+  rejected
+}
+
+enum PublicationStatus {
+  draft
+  published
+  archived
+}
+
+enum EnrollmentStatus {
+  open
+  soon
+  closed
+  completed
+}
+
+enum ContentSource {
+  manual
+  ayu
+}
+
+enum SyncStatus {
+  idle
+  running
+  success
+  failed
+}
+
+model AdminUser {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  email                String                     @unique
+  passwordHash         String
+  name                 String
+  role                 AdminRole                  @default(editor)
+  active               Boolean                    @default(true)
+  lastLoginAt          DateTime?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+  sessions             AuthSession[]
+  auditLogs            AuditLog[]
+  assignedApplications Application[]              @relation("AssignedApplications")
+  applicationChanges   ApplicationStatusHistory[]
+  media                 MediaAsset[]
+
+  @@index([active])
+}
+
+model AuthSession {
+  id           String    @id @default(uuid()) @db.Uuid
+  tokenHash    String    @unique
+  adminId      String    @db.Uuid
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime  @default(now())
+  admin        AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, expiresAt])
+}
+
+model SiteSettings {
+  id                 String           @id @default("main")
+  currentCohort      Int              @default(7)
+  totalParticipants  Int              @default(160)
+  incubationWeeks    Int              @default(12)
+  nextCohortStatus   EnrollmentStatus @default(open)
+  nextCohortDate     String           @default("Даты следующего потока будут объявлены после набора")
+  responseDays       Int              @default(5)
+  contactEmail       String           @default("yassawi_commerc@ayu.edu.kz")
+  contactPhone       String           @default("8 (72533) 6-36-36")
+  address            String           @default("ул. Бекзата Саттарханова, 29, Туркестан, Казахстан")
+  whatsapp           String?
+  instagram          String?
+  telegram           String?
+  youtube            String?
+  contextStats       Json             @default("[]")
+  defaultLocale      String           @default("ru")
+  translations       Json             @default("{}")
+  heroEyebrow        String           @default("Официальная программа AYU · Туркестан")
+  heroTitle          String           @default("Твоя идея может")
+  heroOutline        String           @default("больше.")
+  heroDescription    String           @default("Превращаем идеи студентов и исследователей в продукты, пилоты и компании с поддержкой Офиса коммерциализации университета.")
+  updatedAt          DateTime         @updatedAt
+}
+
+model PageContent {
+  id             String            @id @default(uuid()) @db.Uuid
+  key            String            @unique
+  page           String
+  content        Json
+  translations   Json              @default("{}")
+  seoTitle       String?
+  seoDescription String?
+  status         PublicationStatus @default(draft)
+  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime          @default(now())
+
+  @@index([page, status])
+}
+
+model Program {
+  id                  String             @id @default(uuid()) @db.Uuid
+  slug                String             @unique
+  title               String
+  shortDescription    String             @default("")
+  description         String             @default("")
+  duration            String
+  durationWeeks       Int?
+  price               String             @default("0 ₸")
+  runsPerYear         Int                @default(1)
+  equity              String             @default("0%")
+  isFree              Boolean            @default(true)
+  status              EnrollmentStatus   @default(open)
+  format              String             @default("Офлайн и онлайн")
+  capacity            Int?
+  applicationDeadline DateTime?
+  startDate           DateTime?
+  endDate             DateTime?
+  requirements        Json               @default("[]")
+  stages              Json               @default("[]")
+  outcomes            Json               @default("[]")
+  translations        Json               @default("{}")
+  sortOrder           Int                @default(0)
+  published           Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  cohorts             Cohort[]
+  applications        Application[]
+
+  @@index([published, sortOrder])
+}
+
+model Cohort {
+  id                  String           @id @default(uuid()) @db.Uuid
+  programId           String           @db.Uuid
+  number              Int
+  title               String
+  status              EnrollmentStatus @default(soon)
+  capacity            Int?
+  applicationDeadline DateTime?
+  startDate           DateTime?
+  endDate             DateTime?
+  published           Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  program             Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  applications        Application[]
+  projects            Project[]
+
+  @@unique([programId, number])
+  @@index([status, published])
+}
+
+model Project {
+  id              String            @id @default(uuid()) @db.Uuid
+  slug            String            @unique
+  name            String
+  summary         String
+  description     String            @default("")
+  tags            String[]          @default([])
+  accent          String            @default("#a8efd8")
+  secondary       String            @default("#d9ff62")
+  glyph           String
+  stage           String
+  trlLevel        Int?
+  cohortLabel     String            @default("")
+  cohortId        String?           @db.Uuid
+  visual          String            @default("nodes")
+  websiteUrl      String?
+  demoUrl         String?
+  presentationUrl String?
+  socialUrl       String?
+  team            Json              @default("[]")
+  metrics         Json              @default("[]")
+  translations    Json              @default("{}")
+  featured        Boolean           @default(false)
+  sortOrder       Int               @default(0)
+  status          PublicationStatus @default(draft)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  cohort          Cohort?           @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  media           ProjectMedia[]
+
+  @@index([status, featured, sortOrder])
+  @@index([cohortId])
+}
+
+model ProjectMedia {
+  id        String     @id @default(uuid()) @db.Uuid
+  projectId String     @db.Uuid
+  mediaId   String     @db.Uuid
+  kind      String     @default("gallery")
+  alt       String     @default("")
+  sortOrder Int        @default(0)
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  media     MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, mediaId])
+  @@index([projectId, sortOrder])
+}
+
+model Partner {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  logoUrl    String
+  websiteUrl String?
+  alt        String   @default("")
+  translations Json  @default("{}")
+  sortOrder  Int      @default(0)
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model ItCourse {
+  id               String   @id @default(uuid()) @db.Uuid
+  slug             String   @unique
+  title            String
+  shortDescription String   @default("")
+  description      String   @default("")
+  dateLabel        String   @default("")
+  format           String   @default("Офлайн")
+  duration         String   @default("")
+  includes         Json     @default("[]")
+  translations     Json     @default("{}")
+  imageUrl         String?
+  sortOrder        Int      @default(0)
+  published        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model TeamMember {
+  id             String        @id @default(uuid()) @db.Uuid
+  externalId     String?       @unique
+  name           String
+  role           String
+  email          String        @unique
+  phone          String?
+  imageUrl       String
+  profileUrl     String?
+  source         ContentSource @default(manual)
+  translations   Json          @default("{}")
+  manualOverride Boolean       @default(false)
+  sortOrder      Int           @default(0)
+  published      Boolean       @default(true)
+  syncedAt       DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model NewsItem {
+  id             String        @id @default(uuid()) @db.Uuid
+  externalId     String?       @unique
+  title          String
+  summary        String        @default("")
+  eventDate      DateTime
+  imageUrl       String
+  sourceUrl      String        @unique
+  location       String        @default("Туркестан")
+  source         ContentSource @default(manual)
+  translations   Json          @default("{}")
+  manualOverride Boolean       @default(false)
+  sortOrder      Int           @default(0)
+  published      Boolean       @default(true)
+  syncedAt       DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([published, eventDate])
+}
+
+model Application {
+  id             String                     @id @default(uuid()) @db.Uuid
+  programId      String                     @db.Uuid
+  cohortId       String?                    @db.Uuid
+  name           String
+  email          String
+  phone          String
+  idea           String
+  institution    String?
+  faculty        String?
+  teamInfo       String?
+  consent        Boolean                    @default(false)
+  consentAt      DateTime?
+  status         ApplicationStatus          @default(new)
+  notes          String                     @default("")
+  assignedToId   String?                    @db.Uuid
+  source         String                     @default("website")
+  locale         String                     @default("ru")
+  utm            Json?
+  ipHash         String?
+  userAgent      String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  program        Program                    @relation(fields: [programId], references: [id], onDelete: Restrict)
+  cohort         Cohort?                    @relation(fields: [cohortId], references: [id], onDelete: SetNull)
+  assignedTo     AdminUser?                 @relation("AssignedApplications", fields: [assignedToId], references: [id], onDelete: SetNull)
+  statusHistory  ApplicationStatusHistory[]
+
+  @@index([status, createdAt])
+  @@index([programId, createdAt])
+  @@index([email, createdAt])
+}
+
+model ApplicationStatusHistory {
+  id            String             @id @default(uuid()) @db.Uuid
+  applicationId String             @db.Uuid
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus
+  note          String?
+  changedById   String?            @db.Uuid
+  createdAt     DateTime           @default(now())
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy     AdminUser?         @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, createdAt])
+}
+
+model MediaAsset {
+  id           String         @id @default(uuid()) @db.Uuid
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  url          String
+  storageKey   String         @unique
+  alt          String         @default("")
+  uploadedById String?        @db.Uuid
+  createdAt    DateTime       @default(now())
+  uploadedBy   AdminUser?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  projects     ProjectMedia[]
+
+  @@index([createdAt])
+}
+
+model SyncState {
+  id            String     @id @default(uuid()) @db.Uuid
+  source        String     @unique
+  status        SyncStatus @default(idle)
+  lastAttemptAt DateTime?
+  lastSuccessAt DateTime?
+  lastError     String?
+  itemsCount    Int        @default(0)
+  updatedAt     DateTime   @updatedAt
+}
+
+model AuditLog {
+  id        String     @id @default(uuid()) @db.Uuid
+  adminId   String?    @db.Uuid
+  action    String
+  entity    String
+  entityId  String?
+  payload   Json?
+  ipAddress String?
+  createdAt DateTime   @default(now())
+  admin     AdminUser? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
