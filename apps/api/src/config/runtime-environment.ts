@@ -17,6 +17,7 @@ export function inspectRuntimeEnvironment(env: NodeJS.ProcessEnv = process.env):
     if (env.ADMIN_SEED_PASSWORD && !isStrongPassword(env.ADMIN_SEED_PASSWORD)) errors.push("ADMIN_SEED_PASSWORD must be changed from the default and contain at least 14 characters");
     if (env.COOKIE_SECURE !== "true") errors.push("COOKIE_SECURE must be true in production");
     if (!isSecret(env.IP_HASH_SALT)) errors.push("IP_HASH_SALT must be a unique secret with at least 32 characters");
+    if (env.PERSONAL_DATA_STORAGE_COUNTRY !== "KZ") errors.push("PERSONAL_DATA_STORAGE_COUNTRY must be KZ after confirming the database, backups and personal-data logs are hosted in Kazakhstan");
     validateProductionOrigins(env.WEB_ORIGIN, errors);
     if (env.PUBLIC_API_URL && !env.PUBLIC_API_URL.startsWith("https://")) errors.push("PUBLIC_API_URL must use HTTPS in production");
     if (env.REQUIRE_SMTP === "true" && !hasCompleteSmtp(env)) errors.push("SMTP is required but not completely configured");

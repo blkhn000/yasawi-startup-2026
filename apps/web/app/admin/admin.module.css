@@ -144,6 +144,7 @@
 .applicationBody p { font-size: 12px; line-height: 1.55; margin: 14px 0; color: #50564d; }
 .applicationBody > div { display: flex; gap: 12px; flex-wrap: wrap; }
 .applicationBody a { font-size: 9px; color: #276a59; }
+.applicationBody .consentEvidence { display:block;margin:-4px 0 12px;color:#737970;font-size:9px;line-height:1.5; }
 .applicationControls { display: grid; gap: 8px; }
 .applicationControls select,
 .applicationControls textarea { font-size: 10px; }

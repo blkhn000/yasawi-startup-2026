@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 
-const apiUrl = (process.env.TEST_API_URL ?? "http://localhost:3000/api").replace(/\/$/, "");
-const email = process.env.TEST_ADMIN_EMAIL ?? "admin@yasawi.local";
-const password = process.env.TEST_ADMIN_PASSWORD ?? "ChangeMe-2026!";
+const apiUrl = (process.env.TEST_API_URL ?? "http://localhost:4000/api").replace(/\/$/, "");
+const localEnv = existsSync("../../.env") ? Object.fromEntries(readFileSync("../../.env", "utf8").split(/\r?\n/).filter((line) => line && !line.startsWith("#") && line.includes("=")).map((line) => {
+  const index = line.indexOf("=");
+  return [line.slice(0, index), line.slice(index + 1).replace(/^["']|["']$/g, "")];
+})) : {};
+const email = process.env.TEST_ADMIN_EMAIL ?? localEnv.ADMIN_SEED_EMAIL;
+const password = process.env.TEST_ADMIN_PASSWORD ?? localEnv.ADMIN_SEED_PASSWORD;
+assert.ok(email && password, "Set TEST_ADMIN_EMAIL and TEST_ADMIN_PASSWORD for admin contract checks");
 
 const login = await fetch(`${apiUrl}/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) });
 assert.equal(login.status, 201, `Login failed: ${login.status}`);

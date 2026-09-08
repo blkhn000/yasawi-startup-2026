@@ -311,6 +311,8 @@ model Application {
   teamInfo       String?
   consent        Boolean                    @default(false)
   consentAt      DateTime?
+  consentVersion String
+  authorityConfirmed Boolean                @default(false)
   status         ApplicationStatus          @default(new)
   notes          String                     @default("")
   assignedToId   String?                    @db.Uuid

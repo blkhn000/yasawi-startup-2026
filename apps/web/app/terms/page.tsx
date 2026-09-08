@@ -6,12 +6,12 @@ import { getLocale } from "@/i18n/server";
 import { getPublicSettings } from "@/lib/public-api";
 import { managedPageMetadata } from "@/lib/seo";
 
-export async function generateMetadata(): Promise<Metadata> { return managedPageMetadata(await getLocale(), "privacy"); }
+export async function generateMetadata(): Promise<Metadata> { return managedPageMetadata(await getLocale(), "terms"); }
 
-export default async function PrivacyPage() {
+export default async function TermsPage() {
   const locale = await getLocale();
   const settings = await getPublicSettings(locale);
-  return <LegalDocumentPage document={legalDocuments[locale].privacy} locale={locale} contacts={legalContacts(locale, {
+  return <LegalDocumentPage document={legalDocuments[locale].terms} locale={locale} contacts={legalContacts(locale, {
     email: settings?.contactEmail, phone: settings?.contactPhone, address: settings?.address,
   })} />;
 }

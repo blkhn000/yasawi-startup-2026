@@ -1,12 +1,13 @@
 import { Transform } from "class-transformer";
 import { Equals, IsBoolean, IsEmail, IsIn, IsObject, IsOptional, IsPhoneNumber, IsString, MaxLength, MinLength } from "class-validator";
+import { CURRENT_CONSENT_VERSION } from "./legal-consent";
 
 export class CreateApplicationDto {
   @IsIn(["incubation", "acceleration", "it-education"])
   program: "incubation" | "acceleration" | "it-education";
 
   @IsString()
-  @MinLength(2)
+  @MinLength(3)
   @MaxLength(120)
   name: string;
 
@@ -33,4 +34,13 @@ export class CreateApplicationDto {
   @IsBoolean()
   @Equals(true)
   consent: boolean;
+
+  @Transform(({ value }) => value === true || value === "true")
+  @IsBoolean()
+  @Equals(true)
+  authorityConfirmed: boolean;
+
+  @IsString()
+  @Equals(CURRENT_CONSENT_VERSION)
+  consentVersion: string;
 }

@@ -15,6 +15,8 @@ const staticPages = [
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/apply", priority: 0.8, changeFrequency: "monthly" as const },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
+  { path: "/consent", priority: 0.3, changeFrequency: "yearly" as const },
+  { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
 ];
 
 function localizedEntries(path: string, priority: number, changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]) {

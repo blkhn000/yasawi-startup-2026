@@ -303,6 +303,8 @@ async function main() {
         idea: stringValue(legacyApplication.idea, "Описание не указано"),
         consent: booleanValue(legacyApplication.consent, true),
         consentAt: dateValue(legacyApplication.createdAt),
+        consentVersion: "legacy-import",
+        authorityConfirmed: false,
         status: applicationStatus(legacyApplication.status),
         notes: stringValue(legacyApplication.notes, ""),
         createdAt: dateValue(legacyApplication.createdAt),

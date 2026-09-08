@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 const origin = (process.env.TEST_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 const canonicalOrigin = (process.env.TEST_CANONICAL_ORIGIN || origin).replace(/\/$/, "");
 const locales = ["kk", "ru", "en", "tr"];
-const routes = ["", "/about", "/program", "/program/incubation", "/program/acceleration", "/program/it-education", "/startups", "/gallery", "/faq", "/apply", "/privacy"];
+const routes = ["", "/about", "/program", "/program/incubation", "/program/acceleration", "/program/it-education", "/startups", "/gallery", "/faq", "/apply", "/privacy", "/consent", "/terms"];
+const legalRoutes = new Set(["/privacy", "/consent", "/terms"]);
+const legalMarkers = { kk: "дербес деректер", ru: "персональных данных", en: "personal data", tr: "kişisel veri" };
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -38,6 +40,12 @@ for (const locale of locales) {
     assert.match(body, /type="application\/ld\+json"/i, `${path} is missing structured data`);
     const h1Count = (body.match(/<h1(?:\s|>)/gi) || []).length;
     assert.equal(h1Count, 1, `${path} must contain exactly one h1, found ${h1Count}`);
+    if (legalRoutes.has(route)) {
+      const visibleHtml = body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+      assert.match(visibleHtml, /990440008043/, `${path} must identify the operator by BIN`);
+      assert.ok(visibleHtml.toLocaleLowerCase().includes(legalMarkers[locale]), `${path} is missing its localized personal-data terminology`);
+      assert.doesNotMatch(visibleHtml, /\{(?:operator|bin|email|phone|address)\}/, `${path} contains an unresolved legal placeholder`);
+    }
     checkedPages += 1;
   }
 }

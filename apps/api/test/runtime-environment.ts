@@ -12,6 +12,7 @@ const validProduction = inspectRuntimeEnvironment({
   ADMIN_SEED_PASSWORD: "Safe-Admin-Password-2026!",
   COOKIE_SECURE: "true",
   IP_HASH_SALT: "ip-hash-salt-with-more-than-32-characters",
+  PERSONAL_DATA_STORAGE_COUNTRY: "KZ",
   WEB_ORIGIN: "https://startup.example.kz",
   PUBLIC_API_URL: "https://api.example.kz",
 });
@@ -22,6 +23,7 @@ const requiredIntegrations = inspectRuntimeEnvironment({
     NODE_ENV: "production", DATABASE_URL: "postgresql://database.example/yasawi",
     JWT_ACCESS_SECRET: "access-secret-with-more-than-32-characters-unique", COOKIE_SECURE: "true",
     IP_HASH_SALT: "ip-hash-salt-with-more-than-32-characters", WEB_ORIGIN: "https://startup.example.kz",
+    PERSONAL_DATA_STORAGE_COUNTRY: "KZ",
   },
   REQUIRE_SMTP: "true",
   REQUIRE_S3: "true",

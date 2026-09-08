@@ -2,7 +2,7 @@ import { Injectable, Logger, ServiceUnavailableException } from "@nestjs/common"
 import nodemailer, { type Transporter } from "nodemailer";
 import { PrismaService } from "../database/prisma.service";
 
-type ApplicationMessage = { id: string; name: string; email: string; phone: string; idea: string; program: { title: string } };
+type ApplicationMessage = { id: string; name: string; email: string; phone: string; idea: string; locale: string; consentVersion: string; program: { title: string } };
 
 @Injectable()
 export class NotificationsService {
@@ -51,8 +51,12 @@ export class NotificationsService {
     try {
       const settings = await this.prisma.siteSettings.findUnique({ where: { id: "main" } });
       const from = process.env.SMTP_FROM ?? "Yasawi Startup <no-reply@yasawi.local>";
+      const copy = applicantEmailCopy[application.locale as keyof typeof applicantEmailCopy] ?? applicantEmailCopy.ru;
+      const siteOrigin = process.env.WEB_ORIGIN?.split(",")[0]?.trim().replace(/\/$/, "");
+      const privacyLink = siteOrigin ? `<p><a href="${escapeHtml(`${siteOrigin}/${application.locale}/privacy`)}">${copy.privacy}</a></p>` : "";
+      const contact = settings?.contactEmail ?? "yassawi_commerc@ayu.edu.kz";
       await Promise.all([
-        this.transporter.sendMail({ from, to: application.email, subject: "Заявка в Yasawi Startup получена", html: `<p>Здравствуйте, ${escapeHtml(application.name)}!</p><p>Мы получили вашу заявку на программу «${escapeHtml(application.program.title)}».</p><p>Номер заявки: <strong>${application.id}</strong>.</p>` }),
+        this.transporter.sendMail({ from, to: application.email, subject: copy.subject, html: `<p>${copy.greeting} ${escapeHtml(application.name)}!</p><p>${copy.received} «${escapeHtml(application.program.title)}».</p><p>${copy.reference}: <strong>${application.id}</strong>.<br>${copy.consentVersion}: ${escapeHtml(application.consentVersion)}.</p>${privacyLink}<p>${copy.dataRequests}: <a href="mailto:${escapeHtml(contact)}">${escapeHtml(contact)}</a>.</p>` }),
         settings?.contactEmail ? this.transporter.sendMail({ from, to: settings.contactEmail, replyTo: application.email, subject: `Новая заявка: ${application.program.title}`, html: `<p><strong>${escapeHtml(application.name)}</strong></p><p>${escapeHtml(application.email)} · ${escapeHtml(application.phone)}</p><p>${escapeHtml(application.idea)}</p>` }) : Promise.resolve(),
       ]);
     } catch (error) {
@@ -63,3 +67,10 @@ export class NotificationsService {
 
 function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] ?? character); }
 function errorMessage(error: unknown) { return error instanceof Error ? error.message : "Unknown error"; }
+
+const applicantEmailCopy = {
+  ru: { subject: "Заявка в YASAWI STARTUP получена", greeting: "Здравствуйте,", received: "Мы получили вашу заявку на программу", reference: "Номер заявки", consentVersion: "Версия согласия", privacy: "Как мы обрабатываем персональные данные", dataRequests: "Вопросы, исправление или удаление данных" },
+  kk: { subject: "YASAWI STARTUP өтініміңіз қабылданды", greeting: "Сәлеметсіз бе,", received: "Келесі бағдарламаға берген өтініміңізді қабылдадық:", reference: "Өтінім нөмірі", consentVersion: "Келісім нұсқасы", privacy: "Дербес деректерді қалай өңдейміз", dataRequests: "Деректерге қатысты сұрақтар, түзету немесе жою" },
+  en: { subject: "Your YASAWI STARTUP application has been received", greeting: "Hello,", received: "We have received your application for", reference: "Application reference", consentVersion: "Consent version", privacy: "How we process personal data", dataRequests: "Questions, correction or deletion of data" },
+  tr: { subject: "YASAWI STARTUP başvurunuz alındı", greeting: "Merhaba,", received: "Şu programa başvurunuzu aldık:", reference: "Başvuru numarası", consentVersion: "Onay sürümü", privacy: "Kişisel verileri nasıl işliyoruz", dataRequests: "Verilerle ilgili sorular, düzeltme veya silme" },
+} as const;

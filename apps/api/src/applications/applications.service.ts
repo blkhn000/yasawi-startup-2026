@@ -4,6 +4,7 @@ import type { ApplicationStatus, Prisma } from "../generated/prisma/client";
 import { NotificationsService } from "../notifications/notifications.service";
 import { hashIp } from "../security/ip-hash";
 import { CreateApplicationDto } from "./create-application.dto";
+import { localizeRecord } from "../content/localization";
 
 export type ApplicationFilters = { status?: ApplicationStatus; program?: string; search?: string; page?: number; pageSize?: number };
 
@@ -26,14 +27,16 @@ export class ApplicationsService {
         programId: program.id, cohortId: dto.cohortId || undefined,
         name: dto.name.trim(), email, phone: dto.phone.trim(), idea: dto.idea.trim(),
         institution: dto.institution?.trim(), faculty: dto.faculty?.trim(), teamInfo: dto.teamInfo?.trim(),
-        consent: dto.consent, consentAt: new Date(), locale: dto.locale ?? "ru", utm: dto.utm,
+        consent: dto.consent, consentAt: new Date(), consentVersion: dto.consentVersion,
+        authorityConfirmed: dto.authorityConfirmed, locale: dto.locale ?? "ru", utm: dto.utm,
         ipHash: meta.ip ? hashIp(meta.ip) : undefined, userAgent: meta.userAgent?.slice(0, 500),
         statusHistory: { create: { toStatus: "new", note: "Заявка отправлена через сайт" } },
       },
       include: { program: { select: { slug: true, title: true } } },
     });
 
-    void this.notifications.applicationReceived(application).catch(() => undefined);
+    const localizedProgram = localizeRecord(program, dto.locale);
+    void this.notifications.applicationReceived({ ...application, program: { title: localizedProgram.title } }).catch(() => undefined);
     return { id: application.id, status: "received", createdAt: application.createdAt.toISOString() };
   }
 
@@ -79,8 +82,8 @@ export class ApplicationsService {
   async exportCsv(filters: ApplicationFilters = {}) {
     const where: Prisma.ApplicationWhereInput = { ...(filters.status ? { status: filters.status } : {}), ...(filters.program ? { program: { slug: filters.program } } : {}) };
     const items = await this.prisma.application.findMany({ where, include: { program: { select: { title: true } } }, orderBy: { createdAt: "desc" } });
-    const header = ["ID", "Дата", "Язык", "Программа", "Статус", "Имя", "Email", "Телефон", "Организация", "Факультет", "Идея", "Заметки"];
-    const rows = items.map((item) => [item.id, item.createdAt.toISOString(), item.locale, item.program.title, item.status, item.name, item.email, item.phone, item.institution ?? "", item.faculty ?? "", item.idea, item.notes]);
+    const header = ["ID", "Дата", "Язык", "Программа", "Статус", "Имя", "Email", "Телефон", "Организация", "Факультет", "Идея", "Согласие", "Дата согласия", "Версия согласия", "Полномочия подтверждены", "Заметки"];
+    const rows = items.map((item) => [item.id, item.createdAt.toISOString(), item.locale, item.program.title, item.status, item.name, item.email, item.phone, item.institution ?? "", item.faculty ?? "", item.idea, item.consent, item.consentAt?.toISOString() ?? "", item.consentVersion, item.authorityConfirmed, item.notes]);
     return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
   }
 }

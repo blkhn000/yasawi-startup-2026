@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 chdir(fileURLToPath(new URL("../", import.meta.url)));
 
-const roots = ["README.md", ".env.example", ".env.production.example", "apps/api/src", "apps/api/prisma", "apps/api/test", "apps/web/app", "apps/web/components", "apps/web/i18n", "apps/web/lib"];
+const roots = ["README.md", ".env.example", ".env.production.example", "docs", "apps/api/src", "apps/api/prisma", "apps/api/test", "apps/web/app", "apps/web/components", "apps/web/i18n", "apps/web/lib"];
 const suspiciousSequences = ["Рџ", "РЎ", "Рђ", "РµР", "Р°Р", "СЃ", "вЂ", "Гј", "Д±", "Еџ", "Тљ", "У™"];
 const ignored = new Set(["node_modules", ".next", "generated", "dist"]);
 const suspicious = [];

@@ -19,6 +19,7 @@
     "test:security": "tsx test/runtime-environment.ts",
     "test:cohort-stats": "tsx test/cohort-stats.ts",
     "test:localization": "tsx test/localization.ts",
+    "test:legal-consent": "node test/legal-consent.mjs",
     "test:text-integrity": "node ../../scripts/audit-text-and-env.mjs --api",
     "test:integrations": "tsx test/integrations.ts"
   },

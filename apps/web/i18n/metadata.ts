@@ -14,6 +14,8 @@ const seo = {
     faq: ["Частые вопросы — YASAWI STARTUP", "Ответы на вопросы об участии, программах и подаче заявки."],
     apply: ["Подать заявку — YASAWI STARTUP", "Подайте заявку на инкубацию, акселерацию или бесплатное IT-обучение YASAWI STARTUP."],
     privacy: ["Политика конфиденциальности — YASAWI STARTUP", "Информация об обработке персональных данных участников и заявителей."],
+    consent: ["Согласие на обработку данных — YASAWI STARTUP", "Условия согласия на сбор и обработку персональных данных заявителя."],
+    terms: ["Условия использования — YASAWI STARTUP", "Правила использования сайта и подачи заявки в YASAWI STARTUP."],
   },
   kk: {
     home: ["YASAWI STARTUP — идеядан іске дейін", "Түркістандағы Ахмет Ясауи университетінің бизнес-инкубаторы: бағдарламалар, оқу және стартаптарды қолдау."],
@@ -27,6 +29,8 @@ const seo = {
     faq: ["Жиі қойылатын сұрақтар — YASAWI STARTUP", "Қатысу, бағдарламалар және өтінім беру туралы жауаптар."],
     apply: ["Өтінім беру — YASAWI STARTUP", "Инкубация, акселерация немесе тегін IT-оқыту бағдарламасына өтінім беріңіз."],
     privacy: ["Құпиялық саясаты — YASAWI STARTUP", "Қатысушылар мен өтініш берушілердің дербес деректерін өңдеу туралы ақпарат."],
+    consent: ["Деректерді өңдеуге келісім — YASAWI STARTUP", "Өтінім берушінің дербес деректерін жинауға және өңдеуге келісім талаптары."],
+    terms: ["Пайдалану шарттары — YASAWI STARTUP", "YASAWI STARTUP сайтын пайдалану және өтінім беру қағидалары."],
   },
   en: {
     home: ["YASAWI STARTUP — from idea to launch", "The business incubator of Akhmet Yassawi University in Turkistan: programs, training and startup support."],
@@ -40,6 +44,8 @@ const seo = {
     faq: ["Frequently asked questions — YASAWI STARTUP", "Answers about participation, programs and the application process."],
     apply: ["Apply — YASAWI STARTUP", "Apply for incubation, acceleration or free IT training at YASAWI STARTUP."],
     privacy: ["Privacy policy — YASAWI STARTUP", "How participant and applicant personal data is processed."],
+    consent: ["Data processing consent — YASAWI STARTUP", "Terms of consent to collect and process an applicant's personal data."],
+    terms: ["Terms of use — YASAWI STARTUP", "Rules for using the YASAWI STARTUP website and submitting an application."],
   },
   tr: {
     home: ["YASAWI STARTUP — fikirden hayata", "Türkistan'daki Ahmet Yesevi Üniversitesinin iş kuluçka merkezi: programlar, eğitim ve girişim desteği."],
@@ -53,6 +59,8 @@ const seo = {
     faq: ["Sık sorulan sorular — YASAWI STARTUP", "Katılım, programlar ve başvuru süreci hakkındaki yanıtlar."],
     apply: ["Başvur — YASAWI STARTUP", "YASAWI STARTUP kuluçka, hızlandırma veya ücretsiz BT eğitimine başvurun."],
     privacy: ["Gizlilik politikası — YASAWI STARTUP", "Katılımcı ve başvuru sahibi kişisel verilerinin nasıl işlendiğine ilişkin bilgiler."],
+    consent: ["Veri işleme onayı — YASAWI STARTUP", "Başvuru sahibinin kişisel verilerinin toplanması ve işlenmesine ilişkin onay şartları."],
+    terms: ["Kullanım şartları — YASAWI STARTUP", "YASAWI STARTUP sitesini kullanma ve başvuru gönderme kuralları."],
   },
 } satisfies Record<Locale, Record<string, readonly [string, string]>>;
 
@@ -61,7 +69,7 @@ export type SeoPage = keyof typeof seo.ru;
 const pagePaths: Record<SeoPage, string> = {
   home: "/", about: "/about", programs: "/program", incubation: "/program/incubation",
   acceleration: "/program/acceleration", education: "/program/it-education", startups: "/startups",
-  gallery: "/gallery", faq: "/faq", apply: "/apply", privacy: "/privacy",
+  gallery: "/gallery", faq: "/faq", apply: "/apply", privacy: "/privacy", consent: "/consent", terms: "/terms",
 };
 
 const openGraphLocales: Record<Locale, string> = { kk: "kk_KZ", ru: "ru_RU", en: "en_US", tr: "tr_TR" };

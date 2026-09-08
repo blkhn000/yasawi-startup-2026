@@ -22,6 +22,8 @@
     "test:cohort-stats": "npm run test:cohort-stats --workspace=@yasawi/api",
     "test:localization": "npm run test:localization --workspace=@yasawi/api",
     "test:text-integrity": "npm run test:text-integrity --workspace=@yasawi/api",
+    "test:legal": "node scripts/audit-legal.mjs",
+    "test:legal-integration": "npm run test:legal-consent --workspace=@yasawi/api",
     "test:integrations": "npm run test:integrations --workspace=@yasawi/api",
     "test:seo": "npm run test:seo --workspace=@yasawi/web"
   },
