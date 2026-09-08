@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "../pages.css";
 import { ApplyPageContent } from "@/components/apply-page-content";
 import { SiteLayout } from "@/components/site-shell";
 import { getLocale } from "@/i18n/server";

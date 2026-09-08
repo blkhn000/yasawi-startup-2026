@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "../database/prisma.service";
 import { localizeRecord } from "./localization";
+import { curatedNewsTranslations } from "./news-translations";
 
 export interface PublicNewsItem { id: string; title: string; summary: string; date: string; imageUrl: string; url: string; location: string; source: "AYU" | "YASAWI" }
 export interface NewsSyncResult { success: boolean; items: PublicNewsItem[]; importedItems: number; usedCache: boolean; error?: string }
@@ -22,7 +23,7 @@ export class NewsService {
 
   async list(limit = 6, locale = "ru"): Promise<PublicNewsItem[]> {
     const items = await this.prisma.newsItem.findMany({ where: { published: true }, orderBy: [{ eventDate: "desc" }, { sortOrder: "asc" }], take: Math.min(30, Math.max(1, limit)) });
-    if (items.length) return items.map((item) => toPublic(localizeRecord(item, locale)));
+    if (items.length) return items.map((item) => toPublic(localizeRecord(item, locale), locale));
     return (await this.refresh()).items;
   }
 
@@ -45,10 +46,12 @@ export class NewsService {
       for (const [index, item] of parsed.entries()) {
         const existing = await this.prisma.newsItem.findUnique({ where: { externalId: item.id } });
         if (existing?.manualOverride) continue;
+        const curatedTranslations = curatedNewsTranslations[item.id];
+        const shouldAddTranslations = curatedTranslations && (!existing || !isNonEmptyRecord(existing.translations));
         await this.prisma.newsItem.upsert({
           where: { externalId: item.id },
-          create: { externalId: item.id, title: item.title, eventDate: parseDate(item.date), imageUrl: item.imageUrl, sourceUrl: item.url, location: item.location, source: "ayu", syncedAt: new Date(), sortOrder: index, published: true },
-          update: { title: item.title, eventDate: parseDate(item.date), imageUrl: item.imageUrl, sourceUrl: item.url, location: item.location, syncedAt: new Date(), sortOrder: index },
+          create: { externalId: item.id, title: item.title, eventDate: parseDate(item.date), imageUrl: item.imageUrl, sourceUrl: item.url, location: item.location, translations: curatedTranslations ?? {}, source: "ayu", syncedAt: new Date(), sortOrder: index, published: true },
+          update: { title: item.title, eventDate: parseDate(item.date), imageUrl: item.imageUrl, sourceUrl: item.url, location: item.location, ...(shouldAddTranslations ? { translations: curatedTranslations } : {}), syncedAt: new Date(), sortOrder: index },
         });
       }
       await this.setSync("success", parsed.length);
@@ -58,7 +61,7 @@ export class NewsService {
       this.logger.warn(`News sync failed: ${message}`);
       await this.setSync("failed", undefined, message);
       const cached = await this.prisma.newsItem.findMany({ where: { published: true }, orderBy: { eventDate: "desc" }, take: 6 });
-      return { success: false, items: cached.map(toPublic), importedItems: 0, usedCache: cached.length > 0, error: message };
+      return { success: false, items: cached.map((item) => toPublic(item, "ru")), importedItems: 0, usedCache: cached.length > 0, error: message };
     }
   }
 
@@ -106,8 +109,9 @@ export class NewsService {
 
 function normalizeDate(value: string) { return value.match(/\d{2}\.\d{2}\.\d{4}/)?.[0] ?? value.slice(0, 10); }
 function parseDate(value: string) { const [day, month, year] = value.split(".").map(Number); const date = day && month && year ? new Date(Date.UTC(year, month - 1, day, 12)) : new Date(value); return Number.isNaN(date.valueOf()) ? new Date() : date; }
-function formatDate(date: Date) { return new Intl.DateTimeFormat("ru-RU", { timeZone: "Asia/Almaty" }).format(date); }
-function toPublic(item: { id: string; externalId: string | null; title: string; summary: string; eventDate: Date; imageUrl: string; sourceUrl: string; location: string; source: "manual" | "ayu" }): PublicNewsItem { return { id: item.externalId ?? item.id, title: item.title, summary: item.summary, date: formatDate(item.eventDate), imageUrl: item.imageUrl, url: item.sourceUrl, location: item.location, source: item.source === "ayu" ? "AYU" : "YASAWI" }; }
+function formatDate(date: Date, locale: string) { return new Intl.DateTimeFormat({ kk: "kk-KZ", en: "en-GB", tr: "tr-TR", ru: "ru-RU" }[locale] ?? "ru-RU", { timeZone: "Asia/Almaty" }).format(date); }
+function toPublic(item: { id: string; externalId: string | null; title: string; summary: string; eventDate: Date; imageUrl: string; sourceUrl: string; location: string; source: "manual" | "ayu" }, locale: string): PublicNewsItem { return { id: item.externalId ?? item.id, title: item.title, summary: item.summary, date: formatDate(item.eventDate, locale), imageUrl: item.imageUrl, url: item.sourceUrl, location: item.location, source: item.source === "ayu" ? "AYU" : "YASAWI" }; }
+function isNonEmptyRecord(value: unknown): value is Record<string, unknown> { return value !== null && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0; }
 function positiveNumber(value: string | undefined, fallback: number) { const parsed = Number(value); return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback; }
 function errorMessage(error: unknown) { if (!(error instanceof Error)) return "unknown error"; const cause = "cause" in error && error.cause instanceof Error ? `: ${error.cause.message}` : ""; return `${error.message}${cause}`; }
 function delay(milliseconds: number) { return new Promise<void>((resolve) => setTimeout(resolve, milliseconds)); }

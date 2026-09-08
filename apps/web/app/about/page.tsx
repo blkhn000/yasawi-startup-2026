@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "../pages.css";
 import { ArrowUpRight, Globe2, Rocket, Users, Zap } from "lucide-react";
 import { Eyebrow, PageHero, Reveal, SiteLayout } from "@/components/site-shell";
 import { getPublicPage, getPublicSettings } from "@/lib/public-api";

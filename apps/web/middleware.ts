@@ -25,6 +25,11 @@ export function middleware(request: NextRequest) {
 
   const pathLocale = localeFromPath(pathname);
   if (!pathLocale) {
+    if (request.headers.get("x-yasawi-locale")) {
+      const response = NextResponse.next();
+      response.headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=86400");
+      return response;
+    }
     const locale = normalizeLocale(request.cookies.get(localeCookie)?.value);
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
@@ -37,11 +42,14 @@ export function middleware(request: NextRequest) {
   requestHeaders.set("x-yasawi-locale", pathLocale);
 
   const response = NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
-  response.cookies.set(localeCookie, pathLocale, {
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-    sameSite: "lax",
-  });
+  response.headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=86400");
+  if (request.cookies.get(localeCookie)?.value !== pathLocale) {
+    response.cookies.set(localeCookie, pathLocale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
   return response;
 }
 

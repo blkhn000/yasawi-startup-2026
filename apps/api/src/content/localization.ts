@@ -12,7 +12,7 @@ export function localizeRecord<T extends { translations?: unknown }>(record: T, 
   const translated = translations[locale];
   if (!isRecord(translated)) return base;
 
-  const localized = { ...base, ...translated };
+  const localized = deepMerge(base, translated);
   const baseStats = "contextStats" in base && Array.isArray(base.contextStats) ? base.contextStats : null;
   const translatedStats = Array.isArray(translated.contextStats) ? translated.contextStats : null;
   if (!baseStats || !translatedStats) return localized;
@@ -29,4 +29,13 @@ export function localizeRecord<T extends { translations?: unknown }>(record: T, 
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function deepMerge<T extends Record<string, unknown>>(base: T, translated: Record<string, unknown>): T {
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(translated)) {
+    const baseValue = merged[key];
+    merged[key] = isRecord(baseValue) && isRecord(value) ? deepMerge(baseValue, value) : value;
+  }
+  return merged as T;
 }

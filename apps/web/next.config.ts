@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   output: "standalone",
+  // Keep localized metadata inside <head> for crawlers and HTML audits.
+  htmlLimitedBots: /.*/,
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -29,7 +31,9 @@ const nextConfig: NextConfig = {
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   async rewrites() {
     const apiOrigin = (process.env.API_INTERNAL_URL ?? "http://127.0.0.1:4000").replace(/\/$/, "");
-    return [{ source: "/api/:path*", destination: `${apiOrigin}/api/:path*` }];
+    return {
+      afterFiles: [{ source: "/api/:path*", destination: `${apiOrigin}/api/:path*` }],
+    };
   },
   async headers() {
     const development = process.env.NODE_ENV !== "production";

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope, Unbounded } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { messages } from "@/i18n/messages";
 import { getLocale } from "@/i18n/server";
@@ -10,15 +10,9 @@ import { getPublicSettings } from "@/lib/public-api";
 import { siteUrl } from "@/i18n/metadata";
 import "./globals.css";
 
-const manrope = Manrope({
-  subsets: ["cyrillic", "latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
-
-const unbounded = Unbounded({
-  subsets: ["cyrillic", "latin"],
-  variable: "--font-unbounded",
+const bodyFont = Noto_Sans({
+  subsets: ["cyrillic", "cyrillic-ext", "latin", "latin-ext"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -55,7 +49,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   };
   return (
     <html lang={locale}>
-      <body className={`${manrope.variable} ${unbounded.variable}`}><JsonLd data={identitySchema} /><LocaleProvider locale={locale} messages={messages[locale]}><CmsLiveRefresh />{children}</LocaleProvider></body>
+      <body className={bodyFont.variable}><JsonLd data={identitySchema} /><LocaleProvider locale={locale} messages={messages[locale]}><CmsLiveRefresh />{children}</LocaleProvider></body>
     </html>
   );
 }

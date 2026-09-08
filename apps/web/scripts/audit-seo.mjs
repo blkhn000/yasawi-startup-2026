@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 const origin = (process.env.TEST_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+const canonicalOrigin = (process.env.TEST_CANONICAL_ORIGIN || origin).replace(/\/$/, "");
 const locales = ["kk", "ru", "en", "tr"];
 const routes = ["", "/about", "/program", "/program/incubation", "/program/acceleration", "/program/it-education", "/startups", "/gallery", "/faq", "/apply", "/privacy"];
 
@@ -27,7 +28,7 @@ for (const locale of locales) {
     assert.match(body, new RegExp(`<html[^>]+lang=["']${locale}["']`, "i"), `${path} must expose the correct html lang`);
     assert.match(body, /<title>[^<]{8,}<\/title>/i, `${path} must have a useful title`);
     assert.match(body, /<meta[^>]+name="description"[^>]+content="[^"]{30,}"/i, `${path} must have a useful description`);
-    assert.match(body, new RegExp(`<link[^>]+rel="canonical"[^>]+href="${escapeRegex(`${origin}${path}`)}"`, "i"), `${path} must have a self canonical`);
+    assert.match(body, new RegExp(`<link[^>]+rel="canonical"[^>]+href="${escapeRegex(`${canonicalOrigin}${path}`)}"`, "i"), `${path} must have a self canonical`);
     for (const alternate of [...locales, "x-default"]) {
       assert.match(body, new RegExp(`<link[^>]+rel="alternate"[^>]+hrefLang="${alternate}"`, "i"), `${path} is missing hreflang ${alternate}`);
     }
@@ -44,12 +45,12 @@ for (const locale of locales) {
 const { response: robotsResponse, body: robots } = await request("/robots.txt");
 assert.equal(robotsResponse.status, 200, "robots.txt must return 200");
 assert.match(robots, /Disallow: \/admin/i, "robots.txt must exclude the admin panel");
-assert.match(robots, new RegExp(`Sitemap: ${escapeRegex(origin)}/sitemap\\.xml`, "i"), "robots.txt must reference the sitemap");
+assert.match(robots, new RegExp(`Sitemap: ${escapeRegex(canonicalOrigin)}/sitemap\\.xml`, "i"), "robots.txt must reference the sitemap");
 
 const { response: sitemapResponse, body: sitemap } = await request("/sitemap.xml");
 assert.equal(sitemapResponse.status, 200, "sitemap.xml must return 200");
 for (const locale of locales) {
-  assert.match(sitemap, new RegExp(`<loc>${escapeRegex(origin)}/${locale}(?:<|/)`, "i"), `sitemap.xml is missing ${locale}`);
+  assert.match(sitemap, new RegExp(`<loc>${escapeRegex(canonicalOrigin)}/${locale}(?:<|/)`, "i"), `sitemap.xml is missing ${locale}`);
 }
 assert.match(sitemap, /hreflang="x-default"/i, "sitemap.xml must include x-default alternates");
 assert.doesNotMatch(sitemap, /\/admin(?:<|\/)/i, "sitemap.xml must not include admin pages");

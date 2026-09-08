@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "../pages.css";
 import { GalleryGrid, type GalleryCopy } from "@/components/gallery-grid";
 import { Eyebrow, PageHero, Reveal, SiteLayout } from "@/components/site-shell";
 import { getLocale } from "@/i18n/server";

@@ -94,52 +94,53 @@ export type PublicPageRecord<T> = {
 
 const origin = (process.env.API_INTERNAL_URL ?? "http://127.0.0.1:4000").replace(/\/$/, "");
 const localized = (path: string, locale: Locale = "ru") => `${origin}${path}${path.includes("?") ? "&" : "?"}locale=${locale}`;
+const publicContentCache: RequestInit = { next: { revalidate: 300, tags: ["public-content"] } };
 
 export async function getPublicPrograms(locale: Locale = "ru"): Promise<PublicProgram[] | null> {
   try {
-    const response = await fetch(localized("/api/public/programs", locale), { cache: "no-store" });
+    const response = await fetch(localized("/api/public/programs", locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicProgram[]> : null;
   } catch { return null; }
 }
 
 export async function getPublicProgram(slug: string, locale: Locale = "ru"): Promise<PublicProgram | null> {
   try {
-    const response = await fetch(localized(`/api/public/programs/${slug}`, locale), { cache: "no-store" });
+    const response = await fetch(localized(`/api/public/programs/${slug}`, locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicProgram> : null;
   } catch { return null; }
 }
 
 export async function getPublicSettings(locale: Locale = "ru"): Promise<PublicSettings | null> {
   try {
-    const response = await fetch(localized("/api/public/site-settings", locale), { cache: "no-store" });
+    const response = await fetch(localized("/api/public/site-settings", locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicSettings> : null;
   } catch { return null; }
 }
 
 export async function getPublicHome(locale: Locale = "ru"): Promise<PublicHomeData | null> {
   try {
-    const response = await fetch(localized("/api/public/home", locale), { cache: "no-store" });
+    const response = await fetch(localized("/api/public/home", locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicHomeData> : null;
   } catch { return null; }
 }
 
 export async function getPublicNews(locale: Locale = "ru", limit = 60): Promise<PublicNewsItem[] | null> {
   try {
-    const response = await fetch(localized(`/api/public/news?limit=${limit}`, locale), { cache: "no-store" });
+    const response = await fetch(localized(`/api/public/news?limit=${limit}`, locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicNewsItem[]> : null;
   } catch { return null; }
 }
 
 export async function getPublicProjects(locale: Locale = "ru"): Promise<PublicProject[] | null> {
   try {
-    const response = await fetch(localized("/api/public/projects", locale), { cache: "no-store" });
+    const response = await fetch(localized("/api/public/projects", locale), publicContentCache);
     return response.ok ? response.json() as Promise<PublicProject[]> : null;
   } catch { return null; }
 }
 
 export async function getItCourses(locale: Locale = "ru"): Promise<ItCourse[] | null> {
   try {
-    const response = await fetch(localized("/api/public/it-courses", locale), { cache: "no-store" });
+    const response = await fetch(localized("/api/public/it-courses", locale), publicContentCache);
     return response.ok ? response.json() as Promise<ItCourse[]> : null;
   } catch { return null; }
 }
@@ -150,7 +151,7 @@ export async function getPublicPage<T>(key: string, locale: Locale = "ru"): Prom
 
 export async function getPublicPageRecord<T>(key: string, locale: Locale = "ru"): Promise<PublicPageRecord<T> | null> {
   try {
-    const response = await fetch(localized(`/api/public/pages/${key}`, locale), { cache: "no-store" });
+    const response = await fetch(localized(`/api/public/pages/${key}`, locale), publicContentCache);
     if (!response.ok) return null;
     return response.json() as Promise<PublicPageRecord<T>>;
   } catch { return null; }

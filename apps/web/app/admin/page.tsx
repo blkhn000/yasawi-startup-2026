@@ -245,7 +245,7 @@ export default function AdminPage() {
   }
   async function downloadApplications() { await runSave(async () => { const response = await request("/admin/applications/export"); const url = URL.createObjectURL(await response.blob()); const link = document.createElement("a"); link.href = url; link.download = `yasawi-applications-${new Date().toISOString().slice(0, 10)}.csv`; link.click(); URL.revokeObjectURL(url); }); }
 
-  async function runSave(operation: () => Promise<void>) { setLoading(true); setMessage(""); try { await operation(); window.localStorage.setItem("yasawi-cms-updated", String(Date.now())); setMessage("Изменения сохранены — открытые вкладки сайта обновляются автоматически"); } catch (error) { setMessage(errorMessage(error, "Не удалось сохранить")); } finally { setLoading(false); } }
+  async function runSave(operation: () => Promise<void>) { setLoading(true); setMessage(""); try { await operation(); await fetch("/api/revalidate", { method: "POST" }).catch(() => undefined); window.localStorage.setItem("yasawi-cms-updated", String(Date.now())); setMessage("Изменения сохранены — открытые вкладки сайта обновляются автоматически"); } catch (error) { setMessage(errorMessage(error, "Не удалось сохранить")); } finally { setLoading(false); } }
   async function refreshDashboard() { setDashboard(await api<Dashboard>("/admin/dashboard")); }
   const filteredApplications = useMemo(() => { const query = search.trim().toLowerCase(); return query ? applications.filter((item) => `${item.name} ${item.email} ${item.phone} ${item.idea}`.toLowerCase().includes(query)) : applications; }, [applications, search]);
 

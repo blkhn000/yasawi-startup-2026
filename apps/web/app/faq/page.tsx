@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "../pages.css";
 import { ArrowUpRight } from "lucide-react";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { Eyebrow, PageHero, Reveal, SiteLayout } from "@/components/site-shell";

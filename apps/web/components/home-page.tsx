@@ -3,6 +3,7 @@ import Image from "next/image";
 import { LocaleLink as Link } from "@/components/locale-link";
 import type { PublicHomeData } from "@/lib/public-api";
 import type { Messages } from "@/i18n/messages";
+import type { Locale } from "@/i18n/config";
 import { Eyebrow, Footer, Reveal } from "./site-shell";
 import { Header } from "./site-header";
 import { ResilientImage } from "./resilient-image";
@@ -18,7 +19,7 @@ const fallbackNews: PublicNewsItem[] = [
   { id: "317", title: "В университете открылся инновационный офис AI Startup Hub", date: "12.03.2026", imageUrl: "https://ayu.edu.kz/admin/resimler/etkinlikler/buyuk/6a046d3995b05IMG_9836.JPG", url: "https://ayu.edu.kz/birimler/ru/310-ticarilestirme-ofisi/etkinlikler/317", location: "Офис AI Startup Hub", source: "AYU" },
 ];
 
-export function HomePage({ initialData, copy }: { initialData: PublicHomeData | null; copy: Messages }) {
+export function HomePage({ initialData, copy, locale }: { initialData: PublicHomeData | null; copy: Messages; locale: Locale }) {
   const siteSettings = initialData?.settings ?? null;
   const programSettings = initialData?.programs ?? [];
   // Резервный контент нужен только при недоступном API. Пустой массив от CMS
@@ -48,9 +49,10 @@ export function HomePage({ initialData, copy }: { initialData: PublicHomeData | 
   }) : generatedStats;
   const cohortTitle = siteSettings?.nextCohortStatus === "closed" || siteSettings?.nextCohortStatus === "completed" ? copy.home.cohort.closed : siteSettings?.nextCohortStatus === "soon" ? copy.home.cohort.soon : copy.home.cohort.open;
   const cohortNote = siteSettings?.nextCohortDate || copy.home.cohort.note;
+  const weeklyTargets = { kk: "апталық мақсаттар", ru: "еженедельные цели", en: "weekly targets", tr: "haftalık hedefler" }[locale];
   const programs = [
     { number: "01", title: copy.nav.incubation, text: copy.home.programTexts[0], meta: `12 ${copy.common.weeks} · ${copy.common.free.toLowerCase()}`, href: "/program/incubation", color: "mint" },
-    { number: "02", title: copy.nav.acceleration, text: copy.home.programTexts[1], meta: `10 ${copy.common.weeks} · weekly targets`, href: "/program/acceleration", color: "violet" },
+    { number: "02", title: copy.nav.acceleration, text: copy.home.programTexts[1], meta: `10 ${copy.common.weeks} · ${weeklyTargets}`, href: "/program/acceleration", color: "violet" },
     { number: "03", title: copy.nav.education, text: copy.home.programTexts[2], meta: copy.common.free, href: "/program/it-education", color: "acid" },
   ];
   const displayPrograms = programs.map((program) => {

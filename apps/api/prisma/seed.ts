@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadEnvFile } from "node:process";
 import { PrismaClient, type Prisma } from "../src/generated/prisma/client";
+import { curatedNewsTranslations } from "../src/content/news-translations";
 
 for (const path of [join(process.cwd(), ".env"), join(process.cwd(), "..", "..", ".env")]) {
   try { loadEnvFile(path); } catch {}
@@ -40,6 +41,35 @@ const partners = [
   ["Евразийский национальный университет", "/partners/enu.png", "https://enu.kz/ru/"],
   ["QazInnovations", "/partners/qazinnovations.png", "https://qazinn.kz/"],
 ] as const;
+
+const partnerTranslations: Record<string, Record<string, unknown>> = {
+  "/partners/ayu.png": {
+    kk: { name: "Ахмет Ясауи университеті", alt: "Ахмет Ясауи университетінің логотипі" },
+    en: { name: "Akhmet Yassawi University", alt: "Akhmet Yassawi University logo" },
+    tr: { name: "Ahmet Yesevi Üniversitesi", alt: "Ahmet Yesevi Üniversitesi logosu" },
+  },
+  "/partners/aubiak.webp": { kk: { alt: "AUBIAK логотипі" }, en: { alt: "AUBIAK logo" }, tr: { alt: "AUBIAK logosu" } },
+  "/partners/atameken.png": {
+    kk: { name: "Атамекен ҰКП", alt: "Атамекен ҰКП логотипі" },
+    en: { name: "Atameken National Chamber of Entrepreneurs", alt: "Atameken National Chamber of Entrepreneurs logo" },
+    tr: { name: "Atameken Ulusal Girişimciler Odası", alt: "Atameken Ulusal Girişimciler Odası logosu" },
+  },
+  "/partners/turkistan-jastary.jpg": { kk: { alt: "Turkistan Jastary логотипі" }, en: { alt: "Turkistan Jastary logo" }, tr: { alt: "Turkistan Jastary logosu" } },
+  "/partners/enactus.png": { kk: { alt: "Enactus Kazakhstan логотипі" }, en: { alt: "Enactus Kazakhstan logo" }, tr: { alt: "Enactus Kazakhstan logosu" } },
+  "/partners/partner-06.png": { kk: { alt: "Enactus AYU логотипі" }, en: { alt: "Enactus AYU logo" }, tr: { alt: "Enactus AYU logosu" } },
+  "/partners/nu-ris.png": { kk: { alt: "Nazarbayev University RIS логотипі" }, en: { alt: "Nazarbayev University RIS logo" }, tr: { alt: "Nazarbayev University RIS logosu" } },
+  "/partners/kaznu.png": {
+    kk: { name: "Әл-Фараби атындағы ҚазҰУ", alt: "Әл-Фараби атындағы ҚазҰУ логотипі" },
+    en: { name: "Al-Farabi Kazakh National University", alt: "Al-Farabi Kazakh National University logo" },
+    tr: { name: "El-Farabi Kazak Milli Üniversitesi", alt: "El-Farabi Kazak Milli Üniversitesi logosu" },
+  },
+  "/partners/enu.png": {
+    kk: { name: "Л.Н. Гумилев атындағы Еуразия ұлттық университеті", alt: "Еуразия ұлттық университетінің логотипі" },
+    en: { name: "L.N. Gumilyov Eurasian National University", alt: "L.N. Gumilyov Eurasian National University logo" },
+    tr: { name: "L.N. Gumilyov Avrasya Milli Üniversitesi", alt: "L.N. Gumilyov Avrasya Milli Üniversitesi logosu" },
+  },
+  "/partners/qazinnovations.png": { kk: { alt: "QazInnovations логотипі" }, en: { alt: "QazInnovations logo" }, tr: { alt: "QazInnovations logosu" } },
+};
 
 const team = [
   { externalId: "1241", name: "Азат Исаков", role: "Руководитель Офиса коммерциализации", email: "azat.issakov@ayu.edu.kz", imageUrl: "https://ayu.edu.kz/admin/resimler/personel_resimler/personel_1241_67c2cbdfee3a0.png", profileUrl: "https://ayu.edu.kz/en/personel_detay/1241" },
@@ -86,15 +116,21 @@ const courseTranslations: Record<string, Record<string, unknown>> = {
 };
 
 const teamTranslations: Record<string, Record<string, unknown>> = {
-  "azat.issakov@ayu.edu.kz": { kk: { role: "Коммерцияландыру офисінің басшысы" }, en: { role: "Head of the Commercialization Office" }, tr: { role: "Ticarileştirme Ofisi Başkanı" } },
-  "akerke.rysbay@ayu.edu.kz": { kk: { role: "YASAWI STARTUP жобаларды қолдау секторының үйлестірушісі" }, en: { role: "YASAWI STARTUP Project Support Coordinator" }, tr: { role: "YASAWI STARTUP Proje Destek Koordinatörü" } },
-  "orynkul.orazbayeva@ayu.edu.kz": { kk: { role: "Патенттер және зияткерлік меншік бойынша үйлестіруші" }, en: { role: "Patent and Intellectual Property Coordinator" }, tr: { role: "Patent ve Fikrî Mülkiyet Koordinatörü" } },
+  "azat.issakov@ayu.edu.kz": { kk: { name: "Азат Исақов", role: "Коммерцияландыру офисінің басшысы" }, en: { name: "Azat Issakov", role: "Head of the Commercialization Office" }, tr: { name: "Azat Issakov", role: "Ticarileştirme Ofisi Başkanı" } },
+  "akerke.rysbay@ayu.edu.kz": { kk: { name: "Ақерке Рысбай", role: "YASAWI STARTUP жобаларды қолдау секторының үйлестірушісі" }, en: { name: "Akerke Rysbay", role: "YASAWI STARTUP Project Support Coordinator" }, tr: { name: "Akerke Rysbay", role: "YASAWI STARTUP Proje Destek Koordinatörü" } },
+  "orynkul.orazbayeva@ayu.edu.kz": { kk: { name: "Орынкүл Оразбаева", role: "Патенттер және зияткерлік меншік бойынша үйлестіруші" }, en: { name: "Oryngul Orazbayeva", role: "Patent and Intellectual Property Coordinator" }, tr: { name: "Oryngul Orazbayeva", role: "Patent ve Fikrî Mülkiyet Koordinatörü" } },
 };
 
 const aboutTranslations = {
   kk: { content: { hero: { eyebrow: "Бизнес-инкубатор туралы", title: "Жасампаз адамдар", outline: "тоғысатын орта.", description: "Университет ғылымын, кәсіпкерлік тәжірибені және Түркістанның жас негізін қалаушыларының қуатын біріктіреміз." }, story: { eyebrow: "Біздің рөліміз", title: "Идеялар өмір сүретін", outline: "жағдай қалыптастыру.", paragraphs: ["YASAWI STARTUP 2022 жылдан бері студенттерге, зерттеушілерге және университет қызметкерлеріне байқау мен ғылыми әзірлемені сұранысқа ие шешімге айналдыруға көмектеседі.", "Біз құрылым, мықты орта және тез қателесіп, үйреніп, әрі қарай қозғалуға болатын кеңістік береміз."] }, values: [{ title: "Әрекет", text: "Іске қосылған тәжірибені мінсіз таныстырылымнан жоғары бағалаймыз." }, { title: "Ашықтық", text: "Әртүрлі мамандық иелерін ортақ мәселе төңірегінде біріктіреміз." }, { title: "Жылдамдық", text: "Маңыздысын тез тексеріп, болжамға айлап уақыт жұмсамаймыз." }, { title: "Ауқым", text: "Түркістаннан бастаймыз, бірақ үлкен әлемге арналған өнім жасаймыз." }], stats: [{ value: "2022", label: "іске қосылған жыл" }, { value: "400+", label: "тіркелу" }, { value: "7", label: "лек" }, { value: "60", label: "бағдарлама сағаты" }], contact: { eyebrow: "Біз Түркістандамыз", title: "Сұрағыңыз немесе идеяңыз бар ма?", buttonLabel: "Командаға жазу" } } },
   en: { content: { hero: { eyebrow: "About the business incubator", title: "A meeting point", outline: "for people who build.", description: "We connect university research, entrepreneurial practice and the energy of young founders in Turkistan." }, story: { eyebrow: "Our role", title: "Create the conditions", outline: "where ideas can survive.", paragraphs: ["Since 2022, YASAWI STARTUP has helped students, researchers and University staff turn observations and scientific work into solutions people need.", "We provide structure, a strong community and a space to experiment quickly, learn and move forward."] }, values: [{ title: "Action", text: "We value a running experiment more than a perfect presentation." }, { title: "Openness", text: "We bring people from different disciplines together around a shared problem." }, { title: "Speed", text: "We test what matters and avoid spending months on assumptions." }, { title: "Scale", text: "We begin in Turkistan and build products for a wider world." }], stats: [{ value: "2022", label: "year launched" }, { value: "400+", label: "registrations" }, { value: "7", label: "cohorts" }, { value: "60", label: "program hours" }], contact: { eyebrow: "Based in Turkistan", title: "Have a question or an idea?", buttonLabel: "Contact the team" } } },
   tr: { content: { hero: { eyebrow: "İş kuluçka merkezi hakkında", title: "Üreten insanların", outline: "buluşma noktası.", description: "Üniversite araştırmasını, girişimcilik pratiğini ve Türkistan'ın genç kurucularının enerjisini bir araya getiriyoruz." }, story: { eyebrow: "Rolümüz", title: "Fikirlerin yaşayabileceği", outline: "koşulları oluşturmak.", paragraphs: ["YASAWI STARTUP, 2022'den bu yana öğrenci, araştırmacı ve Üniversite çalışanlarının gözlem ve bilimsel çalışmalarını ihtiyaç duyulan çözümlere dönüştürmesine yardımcı oluyor.", "Hızlı deney yapmak, öğrenmek ve ilerlemek için yapı, güçlü bir çevre ve alan sunuyoruz."] }, values: [{ title: "Eylem", text: "Çalışan bir deneyi kusursuz bir sunumdan daha değerli buluruz." }, { title: "Açıklık", text: "Farklı disiplinlerden insanları ortak bir sorun çevresinde buluştururuz." }, { title: "Hız", text: "Önemli olanı hızla test eder, varsayımlara aylar harcamayız." }, { title: "Ölçek", text: "Türkistan'da başlar, daha geniş bir dünya için ürün geliştiririz." }], stats: [{ value: "2022", label: "başlangıç yılı" }, { value: "400+", label: "kayıt" }, { value: "7", label: "dönem" }, { value: "60", label: "program saati" }], contact: { eyebrow: "Türkistan'dayız", title: "Bir sorunuz veya fikriniz mi var?", buttonLabel: "Ekibe yaz" } } },
+};
+
+const localizedAboutTranslations = {
+  kk: { ...aboutTranslations.kk, page: "Біз туралы", seoTitle: "Біз туралы — YASAWI STARTUP", seoDescription: "Түркістандағы Ахмет Ясауи университетінің бизнес-инкубаторы." },
+  en: { ...aboutTranslations.en, page: "About us", seoTitle: "About us — YASAWI STARTUP", seoDescription: "The business incubator of Akhmet Yassawi University in Turkistan." },
+  tr: { ...aboutTranslations.tr, page: "Hakkımızда", seoTitle: "Hakkımızda — YASAWI STARTUP", seoDescription: "Türkistan'daki Ahmet Yesevi Üniversitesinin iş kuluçka merkezi." },
 };
 
 const defaultContextStats = [
@@ -195,7 +231,12 @@ async function main() {
 
   for (const [index, partner] of partners.entries()) {
     const existing = await prisma.partner.findFirst({ where: { name: partner[0] } });
-    if (!existing) await prisma.partner.create({ data: { name: partner[0], logoUrl: partner[1], websiteUrl: partner[2], alt: `${partner[0]} — логотип`, sortOrder: index } });
+    const translations = (partnerTranslations[partner[1]] ?? {}) as Prisma.InputJsonValue;
+    if (!existing) {
+      await prisma.partner.create({ data: { name: partner[0], logoUrl: partner[1], websiteUrl: partner[2], alt: `${partner[0]} — логотип`, translations, sortOrder: index } });
+    } else {
+      await prisma.partner.update({ where: { id: existing.id }, data: { translations, sortOrder: index } });
+    }
   }
 
   for (const [index, member] of team.entries()) {
@@ -214,6 +255,10 @@ async function main() {
     });
   }
 
+  for (const [externalId, translations] of Object.entries(curatedNewsTranslations)) {
+    await prisma.newsItem.updateMany({ where: { externalId }, data: { translations: translations as Prisma.InputJsonValue } });
+  }
+
   await prisma.pageContent.upsert({
     where: { key: "about" },
     create: {
@@ -229,9 +274,9 @@ async function main() {
         stats: [{ value: "2022", label: "год запуска" }, { value: "400+", label: "регистраций" }, { value: "7", label: "потоков" }, { value: "60", label: "часов в программе" }],
         contact: { eyebrow: "Мы в Туркестане", title: "Есть вопрос или идея?", buttonLabel: "Написать команде" },
       },
-      translations: aboutTranslations,
+      translations: localizedAboutTranslations,
     },
-    update: { translations: aboutTranslations },
+    update: { translations: localizedAboutTranslations },
   });
 
   const adminEmail = (process.env.ADMIN_SEED_EMAIL ?? "admin@yasawi.local").trim().toLowerCase();
